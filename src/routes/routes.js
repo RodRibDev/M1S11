@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const Aluno = require('../models/Aluno')
 const Curso = require('../models/Curso')
+const Professor = require('../models/Professor')
 
 const routes = new Router()
 
@@ -152,6 +153,111 @@ routes.delete('/cursos/:id', async (req, res) => {
 } catch (error) {
     console.log(error.message)
     res.status(500).json({error: 'Não foi possível deletar o curso'})
+}
+  
+})
+
+/* ROTAS PARA PROFESSORES */
+
+routes.post('/professores', async (req, res) => {
+
+    try {
+        const nome = req.body.nome
+        const curso = req.body.curso
+
+        if(!nome) {
+            return res.status(400).json({message: 'O nome é necessário'})
+        }
+
+        if(!curso) {
+            return res.status(400).json({message: 'O curso é necessário'})
+        }
+
+        const professor = await Professor.create({
+            nome: nome,
+            curso: curso
+    })
+
+    res.status(201).json(professor)
+        
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({error: 'Não foi possível cadastrar o professor'})
+    }    
+})
+
+routes.get('/professores', async (req, res) => {
+    let params = {}
+
+    if(req.query.nome)  {
+        params = {...params, nome: req.query.nome}
+    }
+
+    if(req.query.curso)  {
+        params = {...params, curso: req.query.curso}
+    }
+
+    const professores = await Professor.findAll({
+        where: params
+    })
+
+    res.json(professores)
+})
+
+routes.put('/professores/:id', async (req, res) => {
+    
+    try {
+        const { id } = req.params
+
+        const professor = await Professor.findByPk(id)
+
+        if(!professor) {
+        return res.status(404).json({mensagem: 'Professor não encontrado'})
+    }
+
+        const nome = req.body.nome
+        const curso = req.body.curso
+
+        if(!nome) {
+        return res.status(400).json({message: 'O nome é necessário'})
+    }
+
+        if(!curso) {
+        return res.status(400).json({message: 'O curso é necessário'})
+    }
+
+        professor.update(req.body)
+
+        await professor.save()
+
+        res.json(professor)
+    
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({
+            error: 'Não foi possível atualizar os dados do professor'})
+    }
+      
+})
+
+routes.delete('/professores/:id', async (req, res) => {
+    try {
+        const { id } = req.params
+
+        const professor = await Curso.findByPk(id)
+
+        if(!professor) {
+        return res.status(404).json({mensagem: 'Professor não encontrado'})
+    }
+
+    Professor.destroy({
+        where: {
+            id: id
+        }
+    })
+} catch (error) {
+    console.log(error.message)
+    res.status(500).json({error: 'Não foi possível deletar o professor'})
 }
   
 })
