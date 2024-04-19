@@ -4,9 +4,13 @@ const Curso = require('../models/Curso')
 
 const routes = new Router()
 
+/* ROTA BEM VINDO */
+
 routes.get('/bem_vindo', (req, res) =>{
     res.json({name: 'Bem vindo"'})
 })
+
+/* ROTAS PARA ALUNOS */
 
 routes.post('/alunos', async (req,res) => {
 
@@ -47,6 +51,8 @@ routes.get('/alunos', async (req, res) => {
     res.json(alunos)
 
 })
+
+/* ROTAS PARA CURSOS */
 
 routes.post('/cursos', async (req, res) => {
 
@@ -104,5 +110,39 @@ routes.delete('/cursos/:id', (req, res) => {
     })
 })
 
+routes.put('/cursos/:id', async (req, res) => {
+    
+    try {
+        const { id } = req.params
+
+        const curso = await Curso.findByPk(id)
+
+        if(!curso) {
+        return res.status(404).json({mensagem: 'Curso não encontrado'})
+    }
+
+        const nome = req.body.nome
+        const duracao_horas = req.body.duracao_horas
+
+        if(!nome) {
+        return res.status(400).json({message: 'O nome é necessário'})
+    }
+
+        if(!(duracao_horas >= 40 && duracao_horas <= 200)) {
+        return res.status(400).json({message: 'A duração do curso deve ser entre 40 e 200 horas'})
+    }
+
+        curso.update(req.body)
+
+        await curso.save()
+
+        res.json(curso)
+    
+    } catch (error) {
+        console.log(error.message)
+        res.status(500).json({error: 'Não foi possível atualizar o curso'})
+    }
+      
+})
 
 module.exports = routes
