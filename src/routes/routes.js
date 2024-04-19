@@ -99,17 +99,6 @@ routes.get('/cursos', async (req, res) => {
     res.json(cursos)
 })
 
-
-routes.delete('/cursos/:id', (req, res) => {
-    const id = req.params.id
-
-    Curso.destroy({
-        where: {
-            id: id
-        }
-    })
-})
-
 routes.put('/cursos/:id', async (req, res) => {
     
     try {
@@ -143,6 +132,28 @@ routes.put('/cursos/:id', async (req, res) => {
         res.status(500).json({error: 'Não foi possível atualizar o curso'})
     }
       
+})
+
+routes.delete('/cursos/:id', async (req, res) => {
+    try {
+        const { id } = req.params
+
+        const curso = await Curso.findByPk(id)
+
+        if(!curso) {
+        return res.status(404).json({mensagem: 'Curso não encontrado'})
+    }
+
+    Curso.destroy({
+        where: {
+            id: id
+        }
+    })
+} catch (error) {
+    console.log(error.message)
+    res.status(500).json({error: 'Não foi possível deletar o curso'})
+}
+  
 })
 
 module.exports = routes
